@@ -8,6 +8,7 @@ public class Main {
         NotificationSender email = new EmailSender(audit);
         NotificationSender sms = new SmsSender(audit);
         NotificationSender wa = new WhatsAppSender(audit);
+        NotificationSender push = new PushNotificationSender(audit); // Stretch Goal
 
         email.send(n);
         sms.send(n);
@@ -17,6 +18,8 @@ public class Main {
             System.out.println("WA ERROR: " + ex.getMessage());
             audit.add("WA failed");
         }
+
+        push.send(n);
 
         System.out.println("AUDIT entries=" + audit.size());
     }

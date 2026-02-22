@@ -1,4 +1,9 @@
 public abstract class Exporter {
-    // implied "contract" but not enforced (smell)
+    /**
+     * Exports the request.
+     * Contract: Should NOT throw RuntimeExceptions for valid requests.
+     * If formatting fails due to constraints (like length), return
+     * ExportResult.error().
+     */
     public abstract ExportResult export(ExportRequest req);
 }
