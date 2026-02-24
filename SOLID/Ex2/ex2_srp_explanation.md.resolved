@@ -1,0 +1,51 @@
+# SRP Explanation Guide: Campus Cafeteria Billing (Ex2)
+
+If your instructor asks you to explain **Example 2**, here is the breakdown of what was wrong, what we changed, and why.
+
+---
+
+## 🛑 What was the problem "Before"? (The Violation)
+Originally, the [CafeteriaSystem](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/CafeteriaSystem.java#3-33) class (specifically the [checkout](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/CafeteriaSystem.java#18-32) method) was a **"God Object"**. It had too many responsibilities:
+1.  **Pricing Intelligence**: It knew how to look up prices and calculate subtotals.
+2.  **Tax Policy**: It had hard-coded tax rules (e.g., 5% fixed).
+3.  **Discount Policy**: It had ad-hoc math for student/staff discounts.
+4.  **Invoice Formatting**: It was responsible for building the exact string layout of the invoice.
+5.  **Persistence**: It knew how to write the final invoice string into a storage system.
+
+**The Problem**: If the tax laws changed, you had to edit [CafeteriaSystem](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/CafeteriaSystem.java#3-33). If you wanted to change the invoice from text to PDF, you had to edit [CafeteriaSystem](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/CafeteriaSystem.java#3-33). This class had **too many reasons to change**.
+
+---
+
+## 🛠️ What changes did we make? (The Refactoring)
+We broke the monolithic [checkout](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/CafeteriaSystem.java#18-32) method into specialized components, each with **one single job**.
+
+### The New Architecture:
+1.  **[CafeteriaSystem.java](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/CafeteriaSystem.java)**: Now just an **Orchestrator**. It doesn't know *how* to calculate tax or *how* to format text; it just calls the experts.
+2.  **[BillingService.java](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/BillingService.java)**: Responsible ONLY for the **mathematical calculation** of the bill.
+3.  **[TaxRules.java](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/TaxRules.java)**: Responsible ONLY for **Tax Law logic**.
+4.  **[DiscountRules.java](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/DiscountRules.java)**: Responsible ONLY for **Promotional logic**.
+5.  **[InvoiceFormatter.java](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/InvoiceFormatter.java)**: Responsible ONLY for the **Visual Layout** (String formatting).
+6.  **[FileStore.java](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/FileStore.java)**: Responsible ONLY for **Persistence** (writing to disk/memory).
+
+---
+
+## ❓ Why did we do it? (The Rationale)
+*   **Maintainability**: If the canteen manager wants a "New Year Discount," we only touch [DiscountRules](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/DiscountRules.java#1-18). We don't risk breaking the tax calculation or the formatting logic.
+*   **Extensibility**: We can swap `FileStore` for a `DatabaseStore` without touching the billing logic.
+*   **Testability**: We can now write a test for [DiscountRules](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/DiscountRules.java#1-18) independently without having to create an entire [CafeteriaSystem](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/CafeteriaSystem.java#3-33) or worry about file I/O.
+
+---
+
+## 🎯 How is SRP implemented?
+SRP is implemented by ensuring that **each class has only one reason to change**:
+
+| Class | Single Responsibility | Reason to Change |
+| :--- | :--- | :--- |
+| `TaxRules` | Calculate tax based on customer type | Government changes tax rates. |
+| [DiscountRules](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/DiscountRules.java#1-18) | Decide how much money to deduct | Marketing team changes a promotion. |
+| `InvoiceFormatter` | Turn an Invoice object into a String | Boss wants "TOTAL" in all caps or a different date format. |
+| `FileStore` | Save data to storage | Switching from a text file to a SQL database. |
+| [BillingService](file:///Users/wizard/Desktop/LLD%20Assignments/SST28-LLD101/SOLID/Ex2/src/BillingService.java#3-37) | Map items to prices and combine math | The business process of "creating an invoice" changes. |
+
+> [!TIP]
+> **Key Takeaway**: By separating "Reasoning" (Rules) from "Formatting" and "Persistence," we created a modular system where changes are isolated and safe.
