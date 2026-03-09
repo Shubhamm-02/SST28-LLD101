@@ -4,17 +4,16 @@ import java.util.Map;
 import java.util.Objects;
 
 public class OrderService {
-    private final Map<String, PaymentGateway> gateways;
+    private final Map<String, PaymentGateway> providers;
 
-    public OrderService(Map<String, PaymentGateway> gateways) {
-        this.gateways = Objects.requireNonNull(gateways, "gateways");
+    public OrderService(Map<String, PaymentGateway> providers) {
+        this.providers = Objects.requireNonNull(providers, "providers");
     }
 
-    // Smell: still switches; your refactor should remove this by ensuring map contains adapters.
     public String charge(String provider, String customerId, int amountCents) {
         Objects.requireNonNull(provider, "provider");
-        PaymentGateway gw = gateways.get(provider);
-        if (gw == null) throw new IllegalArgumentException("unknown provider: " + provider);
-        return gw.charge(customerId, amountCents);
+        PaymentGateway gateway = providers.get(provider);
+        if (gateway == null) throw new IllegalArgumentException("unknown provider: " + provider);
+        return gateway.charge(customerId, amountCents);
     }
 }
